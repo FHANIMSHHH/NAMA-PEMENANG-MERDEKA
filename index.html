@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Pemenang Merdeka SKSR 2025</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 0;
+      background: linear-gradient(to right, #010066, #cc0000);
+      color: #000;
+    }
+    header {
+      text-align: center;
+      padding: 15px;
+      background: #ffcc00;
+      color: #010066;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    nav {
+      background: #010066;
+      padding: 10px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    nav a {
+      color: white;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      color: #ffcc00;
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 95%; 
+      margin: 20px auto; 
+      background: #fff;
+    }
+    th, td { 
+      border: 1px solid #ccc; 
+      padding: 6px; 
+      text-align: center; 
+    }
+    input { 
+      width: 95%; 
+      padding: 4px; 
+    }
+    #seni input, #puisi input {
+      width: 140px;
+    }
+    h2 { 
+      text-align: center; 
+      background: #ffcc00; 
+      padding: 6px; 
+      color: #010066;
+    }
+    #printBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background: #cc0000;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    #printBtn:hover {
+      background: #010066;
+    }
+  </style>
+</head>
+<body>
+  <header>🏆 Senarai Pemenang Program Bulan Kemerdekaan SK Seberang Ramai 2025 🇲🇾</header>
+
+  <!-- Shortcut Menu -->
+  <nav>
+    <a href="#kolaj">Kolaj</a>
+    <a href="#basikal">Basikal</a>
+    <a href="#capan">Capan</a>
+    <a href="#explorace">Explorace</a>
+    <a href="#seni">Seni</a>
+    <a href="#puisi">Puisi</a>
+    <a href="#nyanyian">Nyanyian</a>
+    <a href="#kelas">Kelas</a>
+  </nav>
+
+  <button id="printBtn" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+
+  <h2 id="kolaj">Kolaj Merdeka (1–16)</h2>
+  <table id="kolajTable"></table>
+
+  <h2 id="basikal">Basikal Berhias (1–12)</h2>
+  <table id="basikalTable"></table>
+
+  <h2 id="capan">Capan Merdeka (1–3)</h2>
+  <table id="capanTable"></table>
+
+  <h2 id="explorace">Explorace Merdeka (1–10)</h2>
+  <table id="exploraceTable"></table>
+
+  <h2 id="seni">Seni Merdeka</h2>
+  <div style="text-align:center; margin:10px;">
+    <label for="seniTahun">Pilih Tahun: </label>
+    <select id="seniTahun">
+      <option value="1">Tahun 1</option>
+      <option value="2">Tahun 2</option>
+      <option value="3">Tahun 3</option>
+    </select>
+  </div>
+  <table id="seniTable"></table>
+
+  <h2 id="puisi">Puisi Merdeka</h2>
+  <div style="text-align:center; margin:10px;">
+    <label for="puisiTahun">Pilih Tahun: </label>
+    <select id="puisiTahun">
+      <option value="1">Tahun 1</option>
+      <option value="2">Tahun 2</option>
+      <option value="3">Tahun 3</option>
+      <option value="4">Tahun 4</option>
+      <option value="5">Tahun 5</option>
+      <option value="6">Tahun 6</option>
+    </select>
+  </div>
+  <table id="puisiTable"></table>
+
+  <h2 id="nyanyian">Nyanyian Merdeka</h2>
+  <table id="nyanyianTable"></table>
+
+  <h2 id="kelas">Kelas Merdeka</h2>
+  <table id="kelasTable"></table>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    // Config Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyCqd_fMALAjQS-8LFHJ_a-FMSSNL5X-QjA",
+      authDomain: "nama-pemenang.firebaseapp.com",
+      databaseURL: "https://nama-pemenang-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "nama-pemenang",
+      storageBucket: "nama-pemenang.appspot.com",
+      messagingSenderId: "1080464251965",
+      appId: "1:1080464251965:web:87bd03bb5a337e5d9f9654",
+      measurementId: "G-JPSN603K1R"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
+
+    // Fungsi table simple
+function buatTable(tableId, path, bil) {
+      var table = document.getElementById(tableId);
+      var html = "<tr><th>No</th><th>Nama Pemenang</th></tr>";
+      for (let i=1; i<=bil; i++) {
+        let inputId = tableId+"_n"+i;
+        html += "<tr><td>"+i+"</td><td><input id='"+inputId+"' placeholder='Isi nama'></td></tr>";
+      }
+      table.innerHTML = html;
+
+      Array.from(table.getElementsByTagName("input")).forEach(inp=>{
+        inp.addEventListener("change", function(){
+          db.ref(path+"/"+inp.id).set({ nama: inp.value });
+        });
+        db.ref(path+"/"+inp.id).on("value", snap=>{
+          if(snap.exists()) inp.value = snap.val().nama || "";
+        });
+      });
+    }
+
+    // Fungsi table ikut kelas (Seni & Puisi dropdown)
+    function buatTableKelasDropdown(tableId, path, bil, tahun, kelasList) {
+      var table = document.getElementById(tableId);
+      var html = "<tr><th>No</th>";
+      kelasList.forEach(k => html += "<th>"+(tahun ? "Tahun "+tahun+" "+k : k)+"</th>");
+      html += "</tr>";
+
+      for (let i=1; i<=bil; i++) {
+        html += "<tr><td>"+i+"</td>";
+        kelasList.forEach(k => {
+          let safeId = ("Tahun"+tahun+"_"+k).replace(/ /g,"_");
+          let inputId = path+"_"+safeId+"_n"+i;
+          html += "<td><input id='"+inputId+"' placeholder='Isi nama'></td>";
+        });
+        html += "</tr>";
+      }
+      table.innerHTML = html;
+
+      Array.from(table.getElementsByTagName("input")).forEach(inp=>{
+        inp.addEventListener("change", function(){
+          db.ref(path+"/"+inp.id).set({ nama: inp.value });
+        });
+        db.ref(path+"/"+inp.id).on("value", snap=>{
+          if(snap.exists()) inp.value = snap.val().nama || "";
+        });
+      });
+    }
+
+    // Table Seni
+    function buatTableSeni(tahun) {
+      var kelasList = ["Mutiara","Delima","Berlian"];
+      buatTableKelasDropdown("seniTable", "seni/Tahun"+tahun, 5, tahun, kelasList);
+    }
+    document.getElementById("seniTahun").addEventListener("change", function(){
+      buatTableSeni(this.value);
+    });
+
+    // Table Puisi
+    function buatTablePuisi(tahun) {
+      var kelasList = ["Mutiara","Delima","Berlian"];
+      buatTableKelasDropdown("puisiTable", "puisi/Tahun"+tahun, 3, tahun, kelasList);
+    }
+    document.getElementById("puisiTahun").addEventListener("change", function(){
+      buatTablePuisi(this.value);
+    });
+
+    // Table khas 2 column (Nyanyian & Kelas)
+    function buatTableDuaColumn(tableId, path, bil, tahap1, tahap2) {
+      var table = document.getElementById(tableId);
+      var html = "<tr><th>No</th><th>"+tahap1+"</th><th>"+tahap2+"</th></tr>";
+      for (let i=1; i<=bil; i++) {
+        let id1 = path+"_"+tahap1+"_n"+i;
+        let id2 = path+"_"+tahap2+"_n"+i;
+        html += "<tr><td>"+i+"</td>";
+        html += "<td><input id='"+id1+"' placeholder='Isi nama'></td>";
+        html += "<td><input id='"+id2+"' placeholder='Isi nama'></td></tr>";
+      }
+      table.innerHTML = html;
+
+      Array.from(table.getElementsByTagName("input")).forEach(inp=>{
+        inp.addEventListener("change", function(){
+          db.ref(path+"/"+inp.id).set({ nama: inp.value });
+        });
+        db.ref(path+"/"+inp.id).on("value", snap=>{
+          if(snap.exists()) inp.value = snap.val().nama || "";
+        });
+      });
+    }
+
+    // Generate semua jadual
+    buatTable("kolajTable", "kolaj", 16);
+    buatTable("basikalTable", "basikal", 12);
+    buatTable("capanTable", "capan", 3);
+    buatTable("exploraceTable", "explorace", 10);
+
+    buatTableSeni(1);  
+    buatTablePuisi(1);  
+
+    // Nyanyian = Tahap 1 & 2 (1–4)
+    buatTableDuaColumn("nyanyianTable", "nyanyian", 4, "Tahap1", "Tahap2");
+
+    // Kelas Merdeka = Tahap 1 & 2 (1–3)
+    buatTableDuaColumn("kelasTable", "kelas", 3, "Tahap1", "Tahap2");
+  </script>
+</body>
+</html>
